@@ -22,7 +22,8 @@ except ImportError:
         PY_MYSQL = False
 
 
-QUERY_STATUS = 'SHOW STATUS'
+QUERY_STATUS = 'SHOW STATUS;'
+QUERY_THREADS = 'SHOW THREADS;'
 
 STATUS_STATS = [
     'uptime',
@@ -73,6 +74,7 @@ STATUS_STATS = [
 
 ORDER = [
     'commands',
+    'threads',
     'queries',
     'uptime',
     'connections',
@@ -161,7 +163,15 @@ CHARTS = {
             ['query_readtime', 'Query read time', 'incremental'],
             ['avg_query_readtime', 'avg. query read time', 'absolute']
         ]
+    },
+    'threads': {
+        'options': [None, 'threads', '', 'threads', '', 'line'],
+        'lines': [
+            ['running_threads', '# of running threads', 'absolute'],
+            ['max_age_threads', 'age of oldest running thread', 'absolute']
+        ]
     }
+
 }
 
 CHARTS_TPL = {
@@ -188,7 +198,7 @@ CHARTS_TPL = {
         'lines': [
             [None, None, 'absolute']
         ]
-    }
+   }
 }
 
 CHARTS_INDEX_TPL = {
@@ -271,7 +281,7 @@ class Service(SimpleService):
         self.definitions = CHARTS
 	self.__connection = None
 	self.__conn_properties = self.get_connection_properties(self.configuration)
-        self.queries = dict(global_stats=QUERY_STATUS)
+        self.queries = dict(global_stats=QUERY_STATUS, threads=QUERY_THREADS)
 	self.tables = list()
 
     def get_connection_properties(self, conf):
@@ -391,6 +401,15 @@ class Service(SimpleService):
             for key in STATUS_STATS:
                 if key in global_stats:
                     to_netdata[key] = float(global_stats[key])
+        if 'threads' in raw_data:
+            threads = raw_data['threads'][0]
+            maxage = -1
+            total = len(threads)
+            for t in threads:
+                if t[2] != 'query': continue
+                maxage = maxage if maxage > float(t[4]) else float(t[4])
+            to_netdata['running_threads'] = total
+            to_netdata['max_age_threads'] = maxage
 	
 	for table in self.tables:
             name = 'table_{0}'.format(table)

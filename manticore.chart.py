@@ -76,6 +76,8 @@ ORDER = [
     'commands',
     'threads',
     'queries',
+    'query_cache',
+    'query_cache_used',
     'uptime',
     'connections',
     'query_wall',
@@ -162,6 +164,19 @@ CHARTS = {
         'lines': [
             ['query_readtime', 'Query read time', 'incremental'],
             ['avg_query_readtime', 'avg. query read time', 'absolute']
+        ]
+    },
+    'query_cache': {
+        'options': [None, 'Query cache', '', 'query_cache', '', 'line'],
+        'lines': [
+            ['qcache_cached_queries', 'cached queries', 'absolute'],
+            ['qcache_hits', 'hits', 'absolute']
+        ]
+    },
+    'query_cache_used': {
+        'options': [None, 'Used query cache', 'KB', 'query_cache_used', '', 'line'],
+        'lines': [
+            ['qcache_used_bytes', 'size', 'absolute']
         ]
     },
     'threads': {

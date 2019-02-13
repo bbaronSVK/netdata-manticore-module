@@ -414,7 +414,7 @@ class Service(SimpleService):
         if 'global_stats' in raw_data:
             global_stats = dict(raw_data['global_stats'][0])
             for key in STATUS_STATS:
-                if key in global_stats:
+                if key in global_stats and global_stats[key] != 'OFF':
                     to_netdata[key] = float(global_stats[key])
         if 'threads' in raw_data:
             threads = raw_data['threads'][0]
